@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake News Detector</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #1a1b1e;
+            --bg-secondary: #2c2d31;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --accent-primary: #7289da;
+            --accent-success: #43b581;
+            --accent-danger: #f04747;
+            --border-radius: 12px;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin-top: 40px;
+        }
+
+        h1 {
+            font-weight: 700;
+            margin-bottom: 2rem;
+            background: linear-gradient(90deg, var(--accent-primary), #43b581);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        .main-flex {
+            display: flex;
+            gap: 2rem;
+            justify-content: space-between;
+        }
+        @media (max-width: 900px) {
+            .main-flex {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+        }
+
+        .left-panel, .right-panel {
+            flex: 1 1 0;
+            min-width: 320px;
+        }
+
+        .card {
+            background-color: var(--bg-secondary);
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.13);
+            transition: transform 0.2s ease;
+            margin-bottom: 1.5rem;
+        }
+
+        .card:hover {
+            transform: translateY(-2px) scale(1.01);
+        }
+
+        .form-control {
+            background-color: var(--bg-primary);
+            border: 1px solid #3a3b3e;
+            color: var(--text-primary);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-control:focus {
+            background-color: var(--bg-primary);
+            border-color: var(--accent-primary);
+            color: var(--text-primary);
+            box-shadow: 0 0 0 0.2rem rgba(114, 137, 218, 0.18);
+        }
+
+        .form-label {
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, var(--accent-primary), #43b581);
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 0.8rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(90deg, #5b6eae, #2ecc71);
+            transform: translateY(-1px) scale(1.01);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .spinner-border {
+            color: var(--accent-primary);
+        }
+
+        .result-box {
+            display: none;
+            margin-top: 20px;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .real-news {
+            background-color: rgba(67, 181, 129, 0.13);
+            border: 1.5px solid var(--accent-success);
+        }
+
+        .fake-news {
+            background-color: rgba(240, 71, 71, 0.13);
+            border: 1.5px solid var(--accent-danger);
+        }
+
+        #resultText {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        #confidenceText {
+            color: var(--text-secondary);
+            font-size: 0.98rem;
+        }
+
+        .section-label {
+            font-size: 1.08rem;
+            font-weight: 600;
+            color: var(--accent-primary);
+            margin-bottom: 0.7rem;
+            letter-spacing: 0.5px;
+        }
+
+        .knowledge-section {
+            margin-top: 0;
+            padding: 1.5rem;
+            background-color: var(--bg-secondary);
+            border-radius: var(--border-radius);
+            min-height: 200px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .knowledge-section h3 {
+            color: var(--accent-primary);
+            margin-bottom: 1rem;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .knowledge-content {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .section-divider {
+            border-top: 1px solid #3a3b3e;
+            margin: 1.2rem 0 1.2rem 0;
+        }
+
+        .wiki-image {
+            display: block;
+            margin: 1rem auto 0 auto;
+            border-radius: 8px;
+            max-width: 90%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.13);
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-primary);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #5b6eae;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Fake News Detector</h1>
+        <div class="main-flex">
+            <div class="left-panel">
+                <div class="card">
+                    <div class="card-body">
+                        <form id="newsForm">
+                            <div class="mb-3">
+                                <label for="newsText" class="form-label">Enter News Text:</label>
+                                <textarea class="form-control" id="newsText" name="news_text" rows="7" required 
+                                    placeholder="Paste your news article here..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Analyze</button>
+                        </form>
+                    </div>
+                </div>
+                <div id="resultBox" class="result-box">
+                    <div class="section-label">Analysis Result (Machine Learning Model)</div>
+                    <h4 class="text-center mb-3">Analysis Result</h4>
+                    <p class="text-center" id="resultText"></p>
+                    <p class="text-center" id="confidenceText"></p>
+                </div>
+                <div class="loading">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2 text-secondary">Analyzing...</p>
+                </div>
+            </div>
+            <div class="right-panel">
+                <div id="knowledgeSection" class="knowledge-section">
+                    <div class="section-label">Knowledge & Fact-Checking (Powered by Gemini)</div>
+                    <div class="section-divider"></div>
+                    <div id="knowledgeContent" class="knowledge-content"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('newsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const loading = document.querySelector('.loading');
+            const resultBox = document.getElementById('resultBox');
+            const resultText = document.getElementById('resultText');
+            const confidenceText = document.getElementById('confidenceText');
+            const knowledgeSection = document.getElementById('knowledgeSection');
+            const knowledgeContent = document.getElementById('knowledgeContent');
+            
+            loading.style.display = 'block';
+            resultBox.style.display = 'none';
+            knowledgeSection.style.display = 'none';
+            
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        text: document.getElementById('newsText').value
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                resultBox.className = 'result-box ' + (data.is_fake ? 'fake-news' : 'real-news');
+                resultText.textContent = `This news appears to be ${data.is_fake ? 'FAKE' : 'REAL'}`;
+                confidenceText.textContent = `Confidence: ${(data.confidence).toFixed(2)}%`;
+                resultBox.style.display = 'block';
+
+                // Sanitize markdown-like fences from Gemini output
+                let html = data.gemini_analysis.trim();
+                if (html.startsWith("```")) {
+                    html = html.replace(/^```html\s*|^```\s*|```$/gm, '').trim();
+                }
+
+                knowledgeContent.innerHTML = html;
+                knowledgeSection.style.display = 'block';
+
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                loading.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
