@@ -188,7 +188,6 @@ x=tokenizer.texts_to_sequences(x)
 x=pad_sequences(x, maxlen=maxlen)
 (model.predict(x)>=0.5).astype(int)
 
-# prompt: I want to make an API out of this model, what should I do?
 
 # Save the model
 model.save('fake_news_model.h5')  # Save the model in HDF5 format
